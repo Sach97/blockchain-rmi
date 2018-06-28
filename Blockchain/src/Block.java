@@ -6,7 +6,10 @@ public class Block {
 	public String previousHash;
 	private String data;
 	private long timeStamp;
+	private int nonce;
 	
+	
+	//Block constructor
 	public Block(String data, String previousHash) {
 		this.data = data;
 		this.previousHash = previousHash;
@@ -21,9 +24,24 @@ public class Block {
 	@throws what kind of exception does this method throw
 	*/
 	public String calculateHash() {
-		String calculatedHash = StringUtil.applySha256(data + previousHash +Long.toString(timeStamp));
+		String calculatedHash = StringUtil.applySha256(data + previousHash +Long.toString(timeStamp)+Integer.toString(nonce));
 				return calculatedHash;
 	}
 	
-
+	
+	/**
+	Takes in argument an int called difficulty, this is the number of 0’s they must solve.
+	@param the parameters used by the method
+	@return the value returned by the method
+	@throws what kind of exception does this method throw
+	*/
+	public void mineBlock(int difficulty) {
+		String target = new String(new char[difficulty]).replace('\0', '0'); //Create a string with difficulty * "0" 
+		while(!hash.substring( 0, difficulty).equals(target)) {
+			nonce ++;
+			hash = calculateHash();
+		}
+		System.out.println("Block Mined!!! : " + hash);
+	}
+	
 }
