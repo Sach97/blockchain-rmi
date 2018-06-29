@@ -58,5 +58,82 @@ public class Transaction {
 	}
 	
 	
+	/**
+	Returns true if new transaction could be created.	
+	@param the parameters used by the method
+	@return the value returned by the method
+	@throws what kind of exception does this method throw
+	*/
+	public boolean processTransaction() {
+		
+		//Check signature
+		if(verifySignature() == false) {
+			System.out.println("#Transaction signature failed to verify");
+			return false;
+		}
+		
+		//gather transaction inputs (Make sure they are unspent):
+		for(TransactionInput i : inputs) {
+			i.UTXO = SimpleChain.UTXOs.get(i.transactionOutputId);
+		}
+		
+		
+		//check if transaction is valid:
+		if(getInputsValue() < SimpleChain.minimumTransaction) {
+			System.out.println("#TransactionInputs to small: "+ getInputsValue());
+			return false;
+		}
+		
+		//generate transaction outputs
+		float leftOver = getInputsValue() - value;
+		transactionId = calculateHash();
+		outputs.add(new TransactionOutput(this.recipient,value,transactionId));
+		outputs.add(new TransactionOutput( this.sender, leftOver,transactionId));
+		
+		//add outputs to Unspent list
+		for(TransactionOutput o : outputs) {
+			SimpleChain.UTXOs.put(o.id,o);
+		}
+		
+		//remove transaction inputs from UTXO lists as spent
+		for(TransactionInput i : inputs) {
+			if(i.UTXO == null) continue;  //if Transaction can't be found skip it 
+			SimpleChain.UTXOs.remove(i.UTXO.id);
+			
+		}
+		
+		return true;
+	}
+
+	/**
+	Returns sum of inputs(UTXOs) values
+	@param the parameters used by the method
+	@return the value returned by the method
+	@throws what kind of exception does this method throw
+	*/
+	public float getInputsValue() {
+		float total = 0;
+		for(TransactionInput i : inputs) {
+			if(i.UTXO == null) continue;  //if Transaction can't be found skip it 
+			total += i.UTXO.value;
+		}
+		return total;
+	}
+	
+	/**
+	Returns sum of outputs
+	@param the parameters used by the method
+	@return the value returned by the method
+	@throws what kind of exception does this method throw
+	*/
+	public float getOutputsValue() {
+		float total = 0;
+		for(TransactionOutput o : outputs) {
+			total += o.value;
+		}
+		return total;
+	}
+	
+	
 	
 }

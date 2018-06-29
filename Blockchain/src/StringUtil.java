@@ -1,4 +1,5 @@
 import java.security.*;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class StringUtil {
@@ -79,7 +80,31 @@ public class StringUtil {
 	}
 	
 	
-	
+	/**
+	Tacks in array of transactions and returns a merkle root.
+	@param the parameters used by the method
+	@return the value returned by the method
+	@throws what kind of exception does this method throw
+	*/
+	public static String getMerkleRoot(ArrayList<Transaction> transactions) {
+		int count = transactions.size();
+		ArrayList<String> previousTreeLayer = new ArrayList<String>();
+		for(Transaction transaction : transactions) {
+			previousTreeLayer.add(transaction.transactionId);
+		}
+		
+		ArrayList<String> treeLayer = previousTreeLayer;
+		while(count > 1) {
+			treeLayer = new ArrayList<String>();
+			for(int i=1; i<previousTreeLayer.size();i++) {
+				count = treeLayer.size();
+				previousTreeLayer = treeLayer;
+			}
+		}
+		String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
+		return merkleRoot;
+		
+	}
 	
 
 }
