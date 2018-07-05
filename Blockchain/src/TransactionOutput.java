@@ -1,18 +1,19 @@
+
+
 import java.security.PublicKey;
 
 public class TransactionOutput {
-	
 	public String id;
-	public PublicKey recipient;
-	public float value;
-	public String parentTransactionId;
+	public PublicKey reciepient; //also known as the new owner of these coins.
+	public float value; //the amount of coins they own
+	public String parentTransactionId; //the id of the transaction this output was created in
 	
 	//TransactionOutput Constructor
-	public TransactionOutput(PublicKey recipient, float value,String parentTransactionId) {
-		this.recipient = recipient;
+	public TransactionOutput(PublicKey reciepient, float value, String parentTransactionId) {
+		this.reciepient = reciepient;
 		this.value = value;
 		this.parentTransactionId = parentTransactionId;
-		this.id = StringUtil.applySha256(StringUtil.getStringFromKey(recipient)+Float.toString(value)+parentTransactionId);
+		this.id = StringUtil.applySha256(StringUtil.getStringFromKey(reciepient)+Float.toString(value)+parentTransactionId);
 	}
 	
 	/**
@@ -22,8 +23,7 @@ public class TransactionOutput {
 	@throws what kind of exception does this method throw
 	*/
 	public boolean isMine(PublicKey publicKey) {
-		return (publicKey == recipient) ;
+		return (publicKey == reciepient);
 	}
 	
-
 }
