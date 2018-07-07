@@ -128,4 +128,6 @@ public class StringUtil {
 		String merkleRoot = (treeLayer.size() == 1) ? treeLayer.get(0) : "";
 		return merkleRoot;
 	}
+	
+	
 }

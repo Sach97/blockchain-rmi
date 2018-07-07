@@ -4,11 +4,13 @@ import java.security.spec.ECGenParameterSpec;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import org.bouncycastle.crypto.digests.RIPEMD160Digest;
 
 public class Wallet {
 	
 	public PrivateKey privateKey;
 	public PublicKey publicKey;
+	//public String address;
 	
 	public HashMap<String,TransactionOutput> UTXOs = new HashMap<String,TransactionOutput>();
 	
@@ -17,6 +19,7 @@ public class Wallet {
 	public Wallet() {
 		generateKeyPair();
 	}
+	
 	
 	/**
 	Generate an Elliptic Curve KeyPair. This methods makes and sets our Public and Private keys
@@ -35,6 +38,7 @@ public class Wallet {
 	        // Set the public and private keys from the keyPair
 	        privateKey = keyPair.getPrivate();
 	        publicKey = keyPair.getPublic();
+	       //address = setAddress(publicKey);
 	        
 		}catch(Exception e) {
 			throw new RuntimeException(e);
@@ -42,6 +46,36 @@ public class Wallet {
 	}
 	
 	
+//	public String getAddress() {
+//		return this.address;
+//		
+//	}
+	
+//	//inspired by https://en.bitcoin.it/wiki/Address
+//	public String setAddress(PublicKey publicKey) {
+//		byte[] address = new byte[20];
+//		byte[] sha256PubKeyBytes = StringUtil.applySha256(publicKey.toString()).getBytes(); 
+//		try {
+//		        byte[] sha256 = MessageDigest.getInstance("SHA-256").digest(sha256PubKeyBytes);
+//		        RIPEMD160Digest digest = new RIPEMD160Digest();
+//		        digest.update(sha256, 0, sha256.length);
+//		        digest.doFinal(address, 0);
+//		    } catch (NoSuchAlgorithmException e) {
+//		        throw new RuntimeException(e);
+//		    }
+//		
+//		String mainnetworkAddress = "00".concat(address.toString());
+//		String sha256hash = StringUtil.applySha256(mainnetworkAddress);
+//		String addressChecksum = StringUtil.applySha256(sha256hash).substring(0, 8);
+//		//Base58 Base58 = new Base58();
+//		String strAddress = Base58.encode(mainnetworkAddress.concat(addressChecksum).getBytes());
+//		
+//		return strAddress;
+//		
+//	}
+	
+	
+
 	/**
 	Returns balance and stores the UTXO's owned by this wallet in this.UTXOs
 	@param the parameters used by the method

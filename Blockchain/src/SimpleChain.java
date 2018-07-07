@@ -23,8 +23,11 @@ public class SimpleChain {
 		
 		//Create wallets:
 		walletA = new Wallet();
-		walletB = new Wallet();		
+		//System.out.println("WAlletA wallet " + walletA.getAddress());
+		walletB = new Wallet();
+		//System.out.println("WAlletB wallet " + walletB.getAddress());
 		Wallet coinbase = new Wallet();
+		//System.out.println("Coinbase wallet " + coinbase.getAddress());
 		
 		//create genesis transaction, which sends 100 SimpleCoin to walletA: 
 		genesisTransaction = new Transaction(coinbase.publicKey, walletA.publicKey, 100f, null);
