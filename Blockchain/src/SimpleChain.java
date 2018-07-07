@@ -63,7 +63,9 @@ public class SimpleChain {
 		System.out.println("\nWalletA's balance is: " + walletA.getBalance());
 		System.out.println("WalletB's balance is: " + walletB.getBalance());
 		
-		isChainValid();
+		if(!isChainValid()){
+			System.out.println("Chain is not valid");
+		}
 		
 	}
 	
