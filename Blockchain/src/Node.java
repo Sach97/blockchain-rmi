@@ -2,7 +2,7 @@ import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 
 
-public class SimpleChain {
+public class Node {
 	private static ArrayList<Block> blockchain = new ArrayList<Block>(); 
 	private static int difficulty = 5;
 	
@@ -27,12 +27,12 @@ public class SimpleChain {
 	
 	//getters
 	public ArrayList<Block> getBlockchain(){
-		return SimpleChain.blockchain;
+		return Node.blockchain;
 	}
 	
 	
 	public int getDifficulty() {
-		return SimpleChain.difficulty;
+		return Node.difficulty;
 	}
 	
 	
