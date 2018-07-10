@@ -1,20 +1,16 @@
-import com.google.gson.GsonBuilder;
 import java.util.ArrayList;
 
 
 public class Node {
-	private static ArrayList<Block> blockchain = new ArrayList<Block>(); 
-	private static int difficulty = 5;
+	private ArrayList<Block> blockchain = new ArrayList<Block>(); 
+	private int difficulty = 5;
 	
-	public static void main(String[] args) {
-		processBlocks();
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);		
-		System.out.println("\nThe block chain: ");
-		System.out.println(blockchainJson);
-		
+	public Node(ArrayList<Block> blockchain, int difficulty) {
+		this.blockchain=blockchain;
+		this.difficulty=difficulty;
 	}
 	
-	private static void processBlocks() {
+	public void processBlocks() {
 		blockchain.add(new Block("Hi im the first block", "0"));
 		System.out.println("Trying to mine Block 1");
 		blockchain.get(0).mineBlock(difficulty);
@@ -31,12 +27,12 @@ public class Node {
 
 	//getters
 	public ArrayList<Block> getBlockchain(){
-		return Node.blockchain;
+		return this.blockchain;
 	}
 	
 	
 	public int getDifficulty() {
-		return Node.difficulty;
+		return this.difficulty;
 	}
 	
 	
@@ -49,7 +45,7 @@ public class Node {
 	@return the value returned by the method
 	@throws what kind of exception does this method throw
 	*/
-	public static Boolean isChainValid() {
+	public Boolean isChainValid() {
 		Block currentBlock;
 		Block previousBlock;
 		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
