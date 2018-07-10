@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
+import com.google.gson.GsonBuilder;
+
 
 public class Node {
 	private ArrayList<Block> blockchain = new ArrayList<Block>(); 
@@ -16,10 +18,10 @@ public class Node {
 	
 	public void processBlocks() {
 	while(!transactionPool.isEmpty()) {
-		String transaction = this.getTransactionFromPool();
+		String transaction = getTransactionFromPool();
 		
 		blockchain.add(new Block(transaction,getHash()));
-		System.out.println("Trying to mine Block" +count);
+		System.out.println("Trying to mine Block " +count);
 		blockchain.get(count).mineBlock(difficulty);
 
 		count+=1;
@@ -36,12 +38,16 @@ public class Node {
 
 	//getters
 	public ArrayList<Block> getBlockchain(){
-		return this.blockchain;
+		return blockchain;
 	}
 	
+	public String getBlockchainJson(){
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(getBlockchain());
+		return blockchainJson;
+	}
 	
 	public int getDifficulty() {
-		return this.difficulty;
+		return difficulty;
 	}
 	
 	public String getTransactionFromPool(){

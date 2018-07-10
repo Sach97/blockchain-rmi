@@ -20,12 +20,12 @@ public class Block {
 	
 	//getters 
 	 public String getPreviousHash() {
-		 return this.previousHash;
+		 return previousHash;
 	 }
 	 
 	 
 	 public String getHash() {
-		 return this.hash;
+		 return hash;
 	 }
 	 
 	 

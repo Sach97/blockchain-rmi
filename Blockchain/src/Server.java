@@ -15,7 +15,7 @@ public class Server {
 			node.addTransactionToPool(data);
 		}
 		node.processBlocks();
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(node.getBlockchain());		
+		String blockchainJson = node.getBlockchainJson();		
 		System.out.println("\nThe block chain: ");
 		System.out.println(blockchainJson);
 	
