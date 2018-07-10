@@ -7,6 +7,14 @@ public class Node {
 	private static int difficulty = 5;
 	
 	public static void main(String[] args) {
+		processBlocks();
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);		
+		System.out.println("\nThe block chain: ");
+		System.out.println(blockchainJson);
+		
+	}
+	
+	private static void processBlocks() {
 		blockchain.add(new Block("Hi im the first block", "0"));
 		System.out.println("Trying to mine Block 1");
 		blockchain.get(0).mineBlock(difficulty);
@@ -19,12 +27,8 @@ public class Node {
 		System.out.println("Trying to mine Block 3");
 		blockchain.get(2).mineBlock(difficulty);
 		
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(blockchain);		
-		System.out.println("\nThe block chain: ");
-		System.out.println(blockchainJson);
-		
 	}
-	
+
 	//getters
 	public ArrayList<Block> getBlockchain(){
 		return Node.blockchain;
