@@ -1,22 +1,23 @@
+import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 
 import com.google.gson.GsonBuilder;
 
 
-public class Node {
+public class Node implements NodeInterface {
 	private ArrayList<Block> blockchain = new ArrayList<Block>(); 
 	private int difficulty = 5;
 	private PriorityQueue<String> transactionPool;
 	private int count=0;
 	
-	public Node() {
+	protected Node() {
 		transactionPool = new PriorityQueue<String>();
 		
 	}
 	
 	
-	public void processBlocks() {
+	public void processBlocks() throws RemoteException {
 	while(!transactionPool.isEmpty()) {
 		String transaction = getTransactionFromPool();
 		
@@ -28,7 +29,7 @@ public class Node {
 	}
 }
 
-	private String getHash() {
+	public String getHash() throws RemoteException  {
 	String hash = "0";
 	if(!(blockchain.size()== 0)) {
 		hash = blockchain.get(blockchain.size()-1).getHash();
@@ -37,33 +38,33 @@ public class Node {
 }
 
 	//getters
-	public ArrayList<Block> getBlockchain(){
+	public ArrayList<Block> getBlockchain() throws RemoteException {
 		return blockchain;
 	}
 	
-	public String getBlockchainJson(){
+	public String getBlockchainJson() throws RemoteException {
 		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(getBlockchain());
 		return blockchainJson;
 	}
 	
-	public int getDifficulty() {
+	public int getDifficulty() throws RemoteException  {
 		return difficulty;
 	}
 	
-	public String getTransactionFromPool(){
+	public String getTransactionFromPool() throws RemoteException {
 		String transaction = transactionPool.remove();
 		return transaction;
 		
 	}
 	
-	public int getCount() {
+	public int getCount() throws RemoteException  {
 		return count;
 	}
 	
 	//setters
-		public void addTransactionToPool(String transaction) {
-			transactionPool.add(transaction);
-		}
+	public void addTransactionToPool(String transaction) throws RemoteException {
+		transactionPool.add(transaction);
+	}
 		
 	
 	
@@ -76,7 +77,7 @@ public class Node {
 	@return the value returned by the method
 	@throws what kind of exception does this method throw
 	*/
-	public Boolean isChainValid() {
+	public Boolean isChainValid() throws RemoteException {
 		Block currentBlock;
 		Block previousBlock;
 		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
