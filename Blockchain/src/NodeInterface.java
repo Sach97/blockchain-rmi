@@ -15,5 +15,7 @@ public interface NodeInterface extends Remote {
 	public String getHash() throws RemoteException;
 	public void setReady() throws RemoteException;
 	public boolean isReady() throws RemoteException;
+	public String getBlock(int blockId) throws RemoteException;
+	//public void cli() throws RemoteException;
 
 }

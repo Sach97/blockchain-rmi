@@ -1,6 +1,8 @@
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
+import java.util.Scanner;
 
 import com.google.gson.GsonBuilder;
 
@@ -37,6 +39,10 @@ public class Node implements NodeInterface {
 	}
 	return hash;
 }
+	
+	public String getBlock(int blockId) throws RemoteException  {
+		return blockchain.get(blockId).getData();
+	}
 
 	//getters
 	public ArrayList<Block> getBlockchain() throws RemoteException {
@@ -114,6 +120,36 @@ public class Node implements NodeInterface {
 		}
 		return true;
 	}
+
+
+//	public void cli() throws RemoteException {
+////		if(isReady() == true) {
+////			String blockchainJson = getBlockchainJson(); //TODO: error here, doesnt wait the end of process blocks after bat execution	 	
+////    		System.out.println("\nThe block chain: ");
+////    		System.out.println(blockchainJson);
+////		}
+//		
+//		while (true) {
+//            int choice = -1;
+//            System.out.println("//-------------------------//");
+//            System.out.println("[1] Get Blockchain");
+//            System.out.println("[2] Add transaction to pool");
+//            System.out.println("//-------------------------//");
+//            System.out.println("Choose a number: ");
+//
+//            Scanner scn = new Scanner(System.in);
+//            choice = scn.nextInt();
+//            switch (choice) {
+//                case 1:
+//                    createAccount(s, a);
+//                    break;
+//                case 2:
+//                    login(s, a);
+//                    break;
+//            }
+//        }
+//		
+//	}
 	
 	
 

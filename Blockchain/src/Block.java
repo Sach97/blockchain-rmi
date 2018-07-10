@@ -23,7 +23,9 @@ public class Block {
 		 return previousHash;
 	 }
 	 
-	 
+	 public String getData() {
+		 return data;
+	 }
 	 public String getHash() {
 		 return hash;
 	 }
