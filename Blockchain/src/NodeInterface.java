@@ -13,5 +13,7 @@ public interface NodeInterface extends Remote {
 	public int getDifficulty() throws RemoteException;
 	public ArrayList<Block> getBlockchain() throws RemoteException;
 	public String getHash() throws RemoteException;
+	public void setReady() throws RemoteException;
+	public boolean isReady() throws RemoteException;
 
 }

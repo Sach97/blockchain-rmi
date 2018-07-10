@@ -9,7 +9,8 @@ public class Node implements NodeInterface {
 	private ArrayList<Block> blockchain = new ArrayList<Block>(); 
 	private int difficulty = 5;
 	private PriorityQueue<String> transactionPool;
-	private int count=0;
+	private int blockCount=0;
+	private boolean ready = false;
 	
 	protected Node() {
 		transactionPool = new PriorityQueue<String>();
@@ -22,10 +23,10 @@ public class Node implements NodeInterface {
 		String transaction = getTransactionFromPool();
 		
 		blockchain.add(new Block(transaction,getHash()));
-		System.out.println("Trying to mine Block " +count);
-		blockchain.get(count).mineBlock(difficulty);
-
-		count+=1;
+		System.out.println("Trying to mine Block " +blockCount);
+		blockchain.get(blockCount).mineBlock(difficulty);
+		if(transactionPool.isEmpty()) setReady();
+		blockCount+=1;
 	}
 }
 
@@ -57,13 +58,21 @@ public class Node implements NodeInterface {
 		
 	}
 	
+	public boolean isReady() throws RemoteException {
+		return this.ready;
+	}
+	
 	public int getCount() throws RemoteException  {
-		return count;
+		return blockCount;
 	}
 	
 	//setters
 	public void addTransactionToPool(String transaction) throws RemoteException {
 		transactionPool.add(transaction);
+	}
+	
+	public void setReady() throws RemoteException {
+		this.ready = true;
 	}
 		
 	

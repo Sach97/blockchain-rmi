@@ -20,9 +20,11 @@ public class Server {
     			node.addTransactionToPool(data);
     		}
     		node.processBlocks();
-    		String blockchainJson = node.getBlockchainJson();		
-    		System.out.println("\nThe block chain: ");
-    		System.out.println(blockchainJson);
+    		if(node.isReady() == true) {
+    			String blockchainJson = node.getBlockchainJson(); //TODO: error here, doesnt wait the end of process blocks after bat execution	 	
+        		System.out.println("\nThe block chain: ");
+        		System.out.println(blockchainJson);
+    		}
         } catch (MalformedURLException murle) {
             System.out.println();
             System.out.println("MalformedURLException");
