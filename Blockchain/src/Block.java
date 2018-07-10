@@ -2,8 +2,8 @@ import java.util.Date;
 
 public class Block {
 	
-	public String hash;
-	public String previousHash;
+	private String hash;
+	private String previousHash;
 	private String data;
 	private long timeStamp;
 	private int nonce;
@@ -17,6 +17,18 @@ public class Block {
 		this.hash = calculateHash();
 	}
 	
+	
+	//getters 
+	 public String getPreviousHash() {
+		 return this.previousHash;
+	 }
+	 
+	 
+	 public String getHash() {
+		 return this.hash;
+	 }
+	 
+	 
 	/**
 	Calculate the hash from all parts of the block we don’t want to be tampered with
 	@param the parameters used by the method
