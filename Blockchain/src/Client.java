@@ -20,10 +20,10 @@ public class Client {
         }
 
 
-        NodeInterface node;
+        NodeInterface masterNode;
 		try {
-			node = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/Node");
-			cli(node);
+			masterNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MasterNode");
+			cli(masterNode);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,7 +37,7 @@ public class Client {
         
     }
     
-public static void cli(NodeInterface n) {
+public static void cli(NodeInterface masterNode) {
 		
 		while (true) {
             int choice = -1;
@@ -56,7 +56,7 @@ public static void cli(NodeInterface n) {
                 case 1:
 				String firstBlockData;
 				try {
-					firstBlockData = n.getBlock(0);
+					firstBlockData = masterNode.getBlockDataById(0);
 					System.out.println("The first block data : ");
                 	System.out.println(firstBlockData);
 				} catch (RemoteException e) {
@@ -68,7 +68,7 @@ public static void cli(NodeInterface n) {
                 	Scanner scn2 = new Scanner(System.in);
                     String data = scn2.next();
 				try {
-					n.addTransactionToPool(data);
+					masterNode.sendTransaction(data,masterNode);
 					System.out.println("Trying to send transaction processing pool " + data);
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block
@@ -80,7 +80,7 @@ public static void cli(NodeInterface n) {
                     int blockId = scn3.nextInt();
                     String blockData;
     				try {
-    					blockData = n.getBlock(blockId);
+    					blockData = masterNode.getBlockHashById(blockId);
     					System.out.println("The block "+blockId+" data: ");
                     	System.out.println(blockData);
     				} catch (RemoteException e) {
@@ -91,7 +91,7 @@ public static void cli(NodeInterface n) {
                 case 4:
                     boolean valid;
     				try {
-    					valid = n.isChainValid();
+    					valid = masterNode.isChainValid();
                     	if(valid) System.out.println("Yes");
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
@@ -101,7 +101,7 @@ public static void cli(NodeInterface n) {
                 case 5:
                 	String blockchainJson;
     				try {
-    					blockchainJson = n.getBlockchainJson();
+    					blockchainJson = masterNode.getBlockchainJson();
     					System.out.println("The Blockchain");
     					System.out.println(blockchainJson);
     				} catch (RemoteException e) {

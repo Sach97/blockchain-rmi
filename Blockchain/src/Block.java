@@ -3,6 +3,7 @@ import java.util.Date;
 public class Block {
 	
 	private String hash;
+	private int index;
 	private String previousHash;
 	private String data;
 	private long timeStamp;
@@ -10,7 +11,16 @@ public class Block {
 	
 	
 	//Block constructor
+	
 	public Block(String data, String previousHash) {
+		this.data = data;
+		this.previousHash = previousHash;
+		this.timeStamp = new Date().getTime();
+		this.hash = calculateHash();
+	}
+	
+	public Block(String data, String previousHash,int index) {
+		this.index = index;
 		this.data = data;
 		this.previousHash = previousHash;
 		this.timeStamp = new Date().getTime();
@@ -26,9 +36,15 @@ public class Block {
 	 public String getData() {
 		 return data;
 	 }
+	 
 	 public String getHash() {
 		 return hash;
 	 }
+	 
+	 public int getIndex() {
+		 return index;
+	 }
+	 
 	 
 	 
 	/**
@@ -57,5 +73,6 @@ public class Block {
 		}
 		System.out.println("Block Mined!!! : " + hash);
 	}
+	
 	
 }

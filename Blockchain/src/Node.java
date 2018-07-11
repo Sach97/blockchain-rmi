@@ -3,45 +3,63 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
 import com.google.gson.GsonBuilder;
 
 
 public class Node implements NodeInterface {
 	private ArrayList<Block> blockchain = new ArrayList<Block>(); 
 	private int difficulty = 5;
-	private PriorityQueue<String> transactionPool;
+	private PriorityQueue<Block> memPool;
 	private int blockCount=0;
 	private boolean ready = false;
 	
 	protected Node() {
-		transactionPool = new PriorityQueue<String>();
+		memPool = new PriorityQueue<Block>();
 		
 	}
 	
 	
+	
+	//TODO: Create blockchain based on arriving blocks from slave and broadcasting blockchain to slave  
 	public void processBlocks() throws RemoteException {
-	while(!transactionPool.isEmpty() && isChainValid()) {
-		String transaction = getTransactionFromPool();
-		
-		blockchain.add(new Block(transaction,getHash()));
+	while(!memPool.isEmpty() && isChainValid()) {
+		Block arrivingBlock = getBlockFromPool();
+		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash(),blockCount);
+		if(isBlockValid(newBlock)) blockchain.add(newBlock);
 		System.out.println("Trying to mine Block " +blockCount);
 		blockchain.get(blockCount).mineBlock(difficulty);
-		if(transactionPool.isEmpty()) setReady();
+		if(memPool.isEmpty()) setReady();
 		blockCount+=1;
 	}
-}
+	}
+	
+	
+	public void replaceChain(ArrayList<Block> newBlocks) throws RemoteException {
+		if(newBlocks.size() > blockchain.size()) blockchain = newBlocks;
+	}
 
 	public String getHash() throws RemoteException  {
-	String hash = "0";
-	if(!(blockchain.size()== 0)) {
+	String hash = "0"; // prevent from Non null pointer exception
+	if((blockchain.size()== 0)) {
+		blockchain.add(new Block("genesis block",hash,blockCount)); // create genesis block if doesnt exist
+	} else {
 		hash = blockchain.get(blockchain.size()-1).getHash();
 	}
 	return hash;
-}
+	}
 	
-	public String getBlock(int blockId) throws RemoteException  {
+	
+	
+	public String getBlockHashById(int blockId) throws RemoteException  {
 		return blockchain.get(blockId).getData();
 	}
+	
+	public String getBlockDataById(int blockId) throws RemoteException  {
+		return blockchain.get(blockId).getData();
+	}
+	
 
 	//getters
 	public ArrayList<Block> getBlockchain() throws RemoteException {
@@ -57,9 +75,9 @@ public class Node implements NodeInterface {
 		return difficulty;
 	}
 	
-	public String getTransactionFromPool() throws RemoteException {
-		String transaction = transactionPool.remove();
-		return transaction;
+	public Block getBlockFromPool() throws RemoteException {
+		Block block = memPool.remove();
+		return block;
 		
 	}
 	
@@ -72,8 +90,8 @@ public class Node implements NodeInterface {
 	}
 	
 	//setters
-	public void addTransactionToPool(String transaction) throws RemoteException {
-		transactionPool.add(transaction);
+	public void addBlockToPool(Block block) throws RemoteException {
+		memPool.add(block);
 	}
 	
 	public void setReady() throws RemoteException {
@@ -119,9 +137,37 @@ public class Node implements NodeInterface {
 		}
 		return true;
 	}
+	
+	public Boolean isBlockValid(Block newBlock) throws RemoteException {
+		if((getHash() != newBlock.getHash())) return false;
+		if((newBlock.calculateHash() != newBlock.getHash())) return false; 
+		return true;
+		
+		
+	}
 
 
+	//SlaveNode methods
 	
+	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException {
+		//Calculate block hash with previous block hash aka from MasterNode latest block hash
+		Block newBlock = new Block(newData,masterNode.getHash());
+		masterNode.addBlockToPool(newBlock);
+		
+	}
 	
+	public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
+		while(true) {
+			if(data != "") broadcastBlock(data,masterNode);
+			try {
+				TimeUnit.SECONDS.sleep(10); // broadcasting blocks evry 10 seconds
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+	}
+
 
 }
