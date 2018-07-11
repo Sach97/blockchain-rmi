@@ -20,7 +20,7 @@ public class Node implements NodeInterface {
 	
 	
 	public void processBlocks() throws RemoteException {
-	while(!transactionPool.isEmpty()) {
+	while(!transactionPool.isEmpty() && isChainValid()) {
 		String transaction = getTransactionFromPool();
 		
 		blockchain.add(new Block(transaction,getHash()));
