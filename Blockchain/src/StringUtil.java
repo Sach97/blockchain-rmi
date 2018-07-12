@@ -1,5 +1,7 @@
 import java.security.MessageDigest;
 
+import com.google.gson.GsonBuilder;
+
 public class StringUtil {
 	
 	/**
@@ -24,5 +26,10 @@ public class StringUtil {
 			throw new RuntimeException(e);
 		}
 	}
+	
+	//Short hand helper to turn Object into a json string
+		public static String getJson(Object o) {
+			return new GsonBuilder().setPrettyPrinting().create().toJson(o);
+		}
 
 }

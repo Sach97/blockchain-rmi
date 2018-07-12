@@ -85,11 +85,11 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                 case 3:
                 	Scanner scn3 = new Scanner(System.in);
                     int blockId = scn3.nextInt();
-                    String blockData;
+                    String blockHash;
     				try {
-    					blockData = masterNode.getBlockHashById(blockId);
+    					blockHash = masterNode.getBlockHashById(blockId);
     					System.out.println("The block "+blockId+" hash: ");
-                    	System.out.println(blockData);
+                    	System.out.println(blockHash);
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();
@@ -98,7 +98,7 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                 case 4:
                     boolean valid;
     				try {
-    					valid = slaveNode.isChainValid();
+    					valid = masterNode.isChainValid();
                     	if(valid) System.out.println("Yes");
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
@@ -108,7 +108,7 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                 case 5:
                 	String blockchainJson;
     				try {
-    					blockchainJson = masterNode.getBlockchainJson(masterNode);
+    					blockchainJson = StringUtil.getJson(masterNode.getBlockchain());
     					System.out.println("The Blockchain");
     					System.out.println(blockchainJson);
     				} catch (RemoteException e) {
@@ -122,6 +122,20 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
     					size = masterNode.getBlockchainSize();
     					System.out.println("The Blockchain size");
     					System.out.println(size);
+    				} catch (RemoteException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}  	
+                        break;
+                        
+                case 7:
+                	Scanner scn4 = new Scanner(System.in);
+                    int blockId2 = scn4.nextInt();
+                    String blockData;
+    				try {
+    					blockData = masterNode.getBlockDataById(blockId2);
+    					System.out.println("The block "+blockId2+" hash: ");
+                    	System.out.println(blockData);
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();

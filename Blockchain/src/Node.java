@@ -112,14 +112,14 @@ public class Node implements NodeInterface {
 	
 	public ArrayList<Block> getBlockchain() throws RemoteException {
 		//return this.masterNode.getBlockchain();
-		return null;
+		return blockchain;
 	}
 	
-	//only masternode have the true version of the blockchain, slave nodes have in theory their own chain
-	public String getBlockchainJson(NodeInterface m) throws RemoteException {
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(m.getBlockchain());
-		return blockchainJson;
-	}
+//	//only masternode have the true version of the blockchain, slave nodes have in theory their own chain
+//	public String getBlockchainJson(NodeInterface m) throws RemoteException {
+//		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(m.getBlockchain());
+//		return blockchainJson;
+//	}
 	
 	public int getDifficulty() throws RemoteException  {
 		return difficulty;
@@ -214,10 +214,10 @@ public class Node implements NodeInterface {
 				return false;
 			}
 			//check if hash is solved
-			if(!currentBlock.getHash().substring( 0, difficulty).equals(hashTarget)) {
-				System.out.println("This block hasn't been mined");
-				return false;
-			}
+//			if(!currentBlock.getHash().substring( 0, difficulty).equals(hashTarget)) {
+//				System.out.println("This block hasn't been mined");
+//				return false;
+//			}
 		}
 		return true;
 	}

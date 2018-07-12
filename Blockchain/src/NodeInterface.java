@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 public interface NodeInterface extends Remote {
 	
-	public String getBlockchainJson(NodeInterface masterNode) throws RemoteException;
+	//public String getBlockchainJson(NodeInterface masterNode) throws RemoteException;
 	public void addBlockToPool(Block block) throws RemoteException;
 	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException;
 	public void processBlocks() throws RemoteException;
