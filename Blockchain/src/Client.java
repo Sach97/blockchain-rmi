@@ -10,20 +10,20 @@ public class Client {
     public static void main(String[] args) {
 
         String reg_host = "localhost";
-        int reg_port = 1099;
+        int slavenode_port = 1098;
 
         if (args.length == 1) {
-            reg_port = Integer.parseInt(args[0]);
+        	slavenode_port = Integer.parseInt(args[0]);
         } else if (args.length == 2) {
             reg_host = args[0];
-            reg_port = Integer.parseInt(args[1]);
+            slavenode_port = Integer.parseInt(args[1]);
         }
 
 
-        NodeInterface masterNode;
+        NodeInterface slaveNode;
 		try {
-			masterNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + reg_port + "/MasterNode");
-			cli(masterNode);
+			slaveNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + slavenode_port + "/SlaveNode");
+			cli(slaveNode);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,7 +37,7 @@ public class Client {
         
     }
     
-public static void cli(NodeInterface masterNode) {
+public static void cli(NodeInterface slaveNode) {
 		
 		while (true) {
             int choice = -1;
@@ -56,7 +56,7 @@ public static void cli(NodeInterface masterNode) {
                 case 1:
 				String firstBlockData;
 				try {
-					firstBlockData = masterNode.getBlockDataById(0);
+					firstBlockData = slaveNode.getBlockDataById(0);
 					System.out.println("The first block data : ");
                 	System.out.println(firstBlockData);
 				} catch (RemoteException e) {
@@ -68,7 +68,7 @@ public static void cli(NodeInterface masterNode) {
                 	Scanner scn2 = new Scanner(System.in);
                     String data = scn2.next();
 				try {
-					masterNode.sendTransaction(data,masterNode);
+					slaveNode.sendTransaction(data);
 					System.out.println("Trying to send transaction processing pool " + data);
 				} catch (RemoteException e) {
 					// TODO Auto-generated catch block
@@ -80,7 +80,7 @@ public static void cli(NodeInterface masterNode) {
                     int blockId = scn3.nextInt();
                     String blockData;
     				try {
-    					blockData = masterNode.getBlockHashById(blockId);
+    					blockData = slaveNode.getBlockHashById(blockId);
     					System.out.println("The block "+blockId+" data: ");
                     	System.out.println(blockData);
     				} catch (RemoteException e) {
@@ -91,7 +91,7 @@ public static void cli(NodeInterface masterNode) {
                 case 4:
                     boolean valid;
     				try {
-    					valid = masterNode.isChainValid();
+    					valid = slaveNode.isChainValid();
                     	if(valid) System.out.println("Yes");
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
@@ -101,7 +101,7 @@ public static void cli(NodeInterface masterNode) {
                 case 5:
                 	String blockchainJson;
     				try {
-    					blockchainJson = masterNode.getBlockchainJson();
+    					blockchainJson = slaveNode.getBlockchainJson();
     					System.out.println("The Blockchain");
     					System.out.println(blockchainJson);
     				} catch (RemoteException e) {

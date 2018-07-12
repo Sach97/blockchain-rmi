@@ -5,21 +5,21 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class Server {
+public class MasterServer {
 	
 	//public static ArrayList<String> blockData = new ArrayList<String>();
 	
-	public Server(int port) {
+	public MasterServer(int port) {
         try {
             Node n = new Node();
             NodeInterface node = (NodeInterface) UnicastRemoteObject.exportObject(n, 0);
             Naming.rebind("rmi://localhost:" + port + "/MasterNode", node);
             System.out.println("MasterNode is starting...");
             System.out.println("MasterNode started");
-            System.out.println("Waiting for transactions to process ...");
+            System.out.println("Waiting for blocks from slave node ...");
             while(true) {
             	 n.processBlocks();
-            	 System.out.println(n.getCount());
+            	 System.out.println(n.getBlockCount());
             	
             }
            
@@ -43,7 +43,7 @@ public class Server {
         if (args.length == 1) {
             p = Integer.parseInt(args[0]); // custom port number
         }
-        Server s = new Server(p);
+        MasterServer s = new MasterServer(p);
     }
 	
 }

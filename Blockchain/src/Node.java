@@ -13,7 +13,10 @@ public class Node implements NodeInterface {
 	private int difficulty = 5;
 	private PriorityQueue<Block> memPool;
 	private int blockCount=0;
-	private boolean ready = false;
+	private int txCount=0;
+	//private boolean ready = false;
+	private PriorityQueue<String> transactionPool;
+	private NodeInterface masterNode;
 	
 	protected Node() {
 		memPool = new PriorityQueue<Block>();
@@ -21,25 +24,34 @@ public class Node implements NodeInterface {
 	}
 	
 	
-	
-	//TODO: Create blockchain based on arriving blocks from slave and broadcasting blockchain to slave  
+	protected Node(NodeInterface masterNode) throws RemoteException {
+		transactionPool = new PriorityQueue<String>();
+		this.masterNode = (NodeInterface) UnicastRemoteObject.exportObject(masterNode, 0);;
+	}
+
+
+
+	//Create blockchain based on arriving blocks from slave and broadcasting blockchain to slave  
 	public void processBlocks() throws RemoteException {
-	while(!memPool.isEmpty() && isChainValid()) {
-		Block arrivingBlock = getBlockFromPool();
-		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash(),blockCount);
+	//while(!memPool.isEmpty() && isChainValid()) {
+	while(!memPool.isEmpty()) { //We simplified the case with one transaction per Block but otherwise we can check if the chain of blocks is Valid see above
+		Block arrivingBlock = getBlockFromPool(); // Get block from slaveNode
+		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash(),blockCount);  
 		if(isBlockValid(newBlock)) blockchain.add(newBlock);
 		System.out.println("Trying to mine Block " +blockCount);
-		blockchain.get(blockCount).mineBlock(difficulty);
-		if(memPool.isEmpty()) setReady();
+		blockchain.get(blockCount).mineBlock(difficulty); //Only masterNode mine blocks, slaveNode validate transactions
+		//if(memPool.isEmpty()) setReady();
 		blockCount+=1;
 	}
 	}
 	
 	
+	//Take the longest chain
 	public void replaceChain(ArrayList<Block> newBlocks) throws RemoteException {
 		if(newBlocks.size() > blockchain.size()) blockchain = newBlocks;
 	}
 
+	//Get the hash of the latest block
 	public String getHash() throws RemoteException  {
 	String hash = "0"; // prevent from Non null pointer exception
 	if((blockchain.size()== 0)) {
@@ -81,22 +93,27 @@ public class Node implements NodeInterface {
 		
 	}
 	
-	public boolean isReady() throws RemoteException {
-		return this.ready;
-	}
+//	public boolean isReady() throws RemoteException {
+//		return this.ready;
+//	}
 	
-	public int getCount() throws RemoteException  {
+	public int getBlockCount() throws RemoteException  {
 		return blockCount;
 	}
+	
+	public int getTxCount() throws RemoteException  {
+		return txCount;
+	}
+	
 	
 	//setters
 	public void addBlockToPool(Block block) throws RemoteException {
 		memPool.add(block);
 	}
 	
-	public void setReady() throws RemoteException {
-		this.ready = true;
-	}
+//	public void setReady() throws RemoteException {
+//		this.ready = true;
+//	}
 		
 	
 	
@@ -139,8 +156,15 @@ public class Node implements NodeInterface {
 	}
 	
 	public Boolean isBlockValid(Block newBlock) throws RemoteException {
-		if((getHash() != newBlock.getHash())) return false;
-		if((newBlock.calculateHash() != newBlock.getHash())) return false; 
+		if((newBlock.calculateHash() != newBlock.getHash())) {
+			return false; 
+		}
+		if((getHash() != newBlock.getHash())) {
+			return false;
+		}
+		if((newBlock.calculateHash() != newBlock.getHash())) {
+			return false; 
+		}
 		return true;
 		
 		
@@ -149,24 +173,39 @@ public class Node implements NodeInterface {
 
 	//SlaveNode methods
 	
+	public void processTransactions(NodeInterface masterNode) throws RemoteException {
+		while(!transactionPool.isEmpty() && !getTransactionFromPool().isEmpty()) {
+			String t = getTransactionFromPool();
+			//sendTransaction(t,this.masterNode);
+			sendTransaction(t);
+			txCount++;
+			
+		}
+	}
+
+	private String getTransactionFromPool() {
+		String transaction = transactionPool.remove();
+		return transaction;
+	}
+	
 	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException {
-		//Calculate block hash with previous block hash aka from MasterNode latest block hash
-		Block newBlock = new Block(newData,masterNode.getHash());
+		Block newBlock = new Block(newData,masterNode.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
 		masterNode.addBlockToPool(newBlock);
 		
 	}
 	
-	public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
-		while(true) {
-			if(data != "") broadcastBlock(data,masterNode);
-			try {
-				TimeUnit.SECONDS.sleep(10); // broadcasting blocks evry 10 seconds
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+	
+	//public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
+	public void sendTransaction(String data) throws RemoteException {
 		
+			broadcastBlock(data,this.masterNode);
+			//broadcastBlock(data,masterNode);
+//			try {
+//				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
 	}
 
 
