@@ -21,7 +21,7 @@ public class MasterServer {
             System.out.println("Waiting for blocks from slave node ...");
             while(true) {
             	 n.processBlocks();
-            	 System.out.println(n.getBlockCount());
+            	 System.out.println(n.getBlockCount()+" Block processed in MasterNode");
             	
             }
            

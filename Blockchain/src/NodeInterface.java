@@ -10,7 +10,8 @@ public interface NodeInterface extends Remote {
 	public void addBlockToPool(Block block) throws RemoteException;
 	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException;
 	public void processBlocks() throws RemoteException;
-	public void processTransactions(NodeInterface masterNode) throws RemoteException;
+	//public void processTransactions(NodeInterface masterNode) throws RemoteException;
+	public void processTransactions() throws RemoteException, MalformedURLException, NotBoundException;
 	public Boolean isChainValid() throws RemoteException;
 	public int getBlockCount() throws RemoteException;
 	public int getTxCount() throws RemoteException;
@@ -23,10 +24,11 @@ public interface NodeInterface extends Remote {
 	public String getBlockHashById(int blockId) throws RemoteException;
 	public String getBlockDataById(int blockId) throws RemoteException;
 	public void sendTransaction(String data) throws RemoteException, MalformedURLException, NotBoundException;
-	public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException;
+	//public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException;
 	public String getStatus() throws RemoteException;
 	public String getStatus(NodeInterface masterNode) throws RemoteException;
 	public String getStatusFromLookup() throws RemoteException, MalformedURLException, NotBoundException;
+	public int getBlockchainSize() throws RemoteException;
 
 
 }

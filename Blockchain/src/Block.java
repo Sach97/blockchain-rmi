@@ -1,6 +1,7 @@
+import java.io.Serializable;
 import java.util.Date;
 
-public class Block {
+public class Block implements Serializable{
 	
 	private String hash;
 	private int index;

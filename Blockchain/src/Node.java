@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 
 
 public class Node implements NodeInterface {
-	private ArrayList<Block> blockchain = new ArrayList<Block>(); 
+	private ArrayList<Block> blockchain; 
 	private int difficulty = 5;
 	private PriorityQueue<Block> memPool;
 	private int blockCount=0;
@@ -29,6 +29,8 @@ public class Node implements NodeInterface {
 	protected Node(String type, int port) throws MalformedURLException, RemoteException, NotBoundException {
 		//this.status = type.concat(" is ").concat(status);
 		if(type == "master") {
+			blockchain = new ArrayList<Block>();
+			blockchain.add(new Block("genesis block",getHash(),blockCount));
 			this.port = port;
 			memPool = new PriorityQueue<Block>();
 			this.status = type.concat(" is ").concat(status);
@@ -55,11 +57,12 @@ public class Node implements NodeInterface {
 	while(!memPool.isEmpty()) { //We simplified the case with one transaction per Block but otherwise we can check if the chain of blocks is Valid see above
 		Block arrivingBlock = getBlockFromPool(); // Get block from slaveNode
 		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash(),blockCount);  
-		if(isBlockValid(newBlock)) blockchain.add(newBlock);
-		System.out.println("Trying to mine Block " +blockCount);
-		blockchain.get(blockCount).mineBlock(difficulty); //Only masterNode mine blocks, slaveNode validate transactions
-		//if(memPool.isEmpty()) setReady();
-		blockCount+=1;
+		if(isChainValid(newBlock)) {
+			blockchain.add(newBlock);
+			blockCount+=1;
+			System.out.println("Trying to mine Block " +blockCount);
+			blockchain.get(blockCount).mineBlock(difficulty); //Only masterNode mine blocks, slaveNode validate transactions
+		}
 	}
 	}
 	
@@ -71,19 +74,29 @@ public class Node implements NodeInterface {
 
 	//Get the hash of the latest block
 	public String getHash() throws RemoteException  {
-	String hash = "0"; // prevent from Non null pointer exception
-	if((blockchain.size()== 0)) {
-		blockchain.add(new Block("genesis block",hash,blockCount)); // create genesis block if doesnt exist
-	} else {
-		hash = blockchain.get(blockchain.size()-1).getHash();
-	}
-	return hash;
+//	String hash = "0"; // prevent from Non null pointer exception
+//	if((blockchain.size()== 0)) {
+//		blockchain.add(new Block("genesis block",hash,blockCount)); // create genesis block if doesnt exist
+//	} else {
+//		hash = blockchain.get(blockchain.size()-1).getHash();
+//	}
+		String hash;
+		if((blockchain.size()== 0)) {
+			hash = "0";
+		} else {
+			hash = blockchain.get(blockchain.size()-1).getHash();
+		}
+		return hash;
 	}
 	
 	
 	
 	public String getBlockHashById(int blockId) throws RemoteException  {
-		return blockchain.get(blockId).getData();
+		return blockchain.get(blockId).getHash();
+	}
+	
+	public int getBlockchainSize() throws RemoteException  {
+		return blockchain.size();
 	}
 	
 	public String getBlockDataById(int blockId) throws RemoteException  {
@@ -102,8 +115,9 @@ public class Node implements NodeInterface {
 		return null;
 	}
 	
-	public String getBlockchainJson(NodeInterface masterNode) throws RemoteException {
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(masterNode.getBlockchain());
+	//only masternode have the true version of the blockchain, slave nodes have in theory their own chain
+	public String getBlockchainJson(NodeInterface m) throws RemoteException {
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(m.getBlockchain());
 		return blockchainJson;
 	}
 	
@@ -179,6 +193,35 @@ public class Node implements NodeInterface {
 		return true;
 	}
 	
+	public Boolean isChainValid(Block newBlock) throws RemoteException {
+		Block currentBlock;
+		Block previousBlock;
+		String hashTarget = new String(new char[difficulty]).replace('\0', '0');
+		
+		for(int i=1;i<blockchain.size();i++) {
+			currentBlock = newBlock;
+			previousBlock = blockchain.get(newBlock.getIndex()-1);
+			
+			//compare registered hash and calculated hash:
+			if(!currentBlock.getHash().equals(currentBlock.calculateHash())) {
+				System.out.println("Current Hash not equal");
+				return false;
+			}
+			
+			//compare previous hash and registered previous hash
+			if(!previousBlock.getHash().equals(previousBlock.calculateHash())) {
+				System.out.println("Previous hash not equal");
+				return false;
+			}
+			//check if hash is solved
+			if(!currentBlock.getHash().substring( 0, difficulty).equals(hashTarget)) {
+				System.out.println("This block hasn't been mined");
+				return false;
+			}
+		}
+		return true;
+	}
+	
 	public Boolean isBlockValid(Block newBlock) throws RemoteException {
 		if((newBlock.calculateHash() != newBlock.getHash())) {
 			return false; 
@@ -197,12 +240,14 @@ public class Node implements NodeInterface {
 
 	//SlaveNode methods
 	
-	public void processTransactions(NodeInterface masterNode) throws RemoteException {
+	//public void processTransactions(NodeInterface masterNode) throws RemoteException {
+	public void processTransactions() throws RemoteException, MalformedURLException, NotBoundException {
 		while(!transactionPool.isEmpty() && !getTransactionFromPool().isEmpty()) {
 			String t = getTransactionFromPool();
-			sendTransaction(t,masterNode);
-			//sendTransaction(t);
-			txCount++;
+			//if((t != "")) txCount+=1;
+			//sendTransaction(t,masterNode);
+			sendTransaction(t);
+			//txCount+=1;
 			
 		}
 	}
@@ -212,32 +257,35 @@ public class Node implements NodeInterface {
 		return transaction;
 	}
 	
-	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException {
-		Block newBlock = new Block(newData,masterNode.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
-		masterNode.addBlockToPool(newBlock);
+	public void broadcastBlock(String newData, NodeInterface m) throws RemoteException {
+		Block newBlock = new Block(newData,m.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
+		m.addBlockToPool(newBlock);
 		
 	}
 	
 	
-	public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
-	//public void sendTransaction(String data) throws RemoteException {
-		
-			//broadcastBlock(data);
-		broadcastBlock(data,masterNode);
-//			try {
-//				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-	}
+//	public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
+//	//public void sendTransaction(String data) throws RemoteException {
+//		
+//			//broadcastBlock(data);
+//			broadcastBlock(data,masterNode);
+////			try {
+////				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
+////			} catch (InterruptedException e) {
+////				// TODO Auto-generated catch block
+////				e.printStackTrace();
+////			}
+//	}
+	
 	public void sendTransaction(String data) throws RemoteException, MalformedURLException, NotBoundException {
 	//public void sendTransaction(String data) throws RemoteException {
 		
 			//broadcastBlock(data);
-			NodeInterface m = (NodeInterface) Naming.lookup("rmi://localhost" + ":" + this.port + "/MasterNode");
-			NodeInterface masterNode = (NodeInterface) UnicastRemoteObject.exportObject(m, 0);
-			broadcastBlock(data,masterNode);
+			//NodeInterface m = (NodeInterface) UnicastRemoteObject.exportObject(this.masterNode, 0);
+			if((!data.isEmpty())) {
+				broadcastBlock(data,this.masterNode);
+				txCount+=1;
+			}
 //			try {
 //				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
 //			} catch (InterruptedException e) {
@@ -247,8 +295,8 @@ public class Node implements NodeInterface {
 	}
 
 
-	public String getStatus(NodeInterface masterNode) throws RemoteException {
-		String status = masterNode.getStatus();
+	public String getStatus(NodeInterface m) throws RemoteException {
+		String status = m.getStatus();
 		return status;
 	}
 	

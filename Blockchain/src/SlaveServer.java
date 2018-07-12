@@ -38,7 +38,14 @@ public class SlaveServer {
         System.out.println(slaveNode.getStatus(masterNode)+" From SlaveNode Registry");
         System.out.println(slaveNode.getStatusFromLookup()+" From SlaveNode Registry without passsing the object instance");
         
-	    // send transaction to masterNode
+        //process transactions
+        while(true) {
+        	slaveNode.processTransactions();
+	       	 System.out.println(slaveNode.getTxCount()+" Transaction processed in SlaveNode");
+       	
+       }
+	    
+        
     	
       
     

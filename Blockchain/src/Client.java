@@ -48,9 +48,11 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
             System.out.println("//-------------------------//");
             System.out.println("[1] Get First Block");
             System.out.println("[2] Add data to blockchain");
-            System.out.println("[3] Get Block id");
+            System.out.println("[3] Get Block hash by id");
             System.out.println("[4] Is blockchain valid ?");
             System.out.println("[5] Give me the Blockchain");
+            System.out.println("[6] What is the size of the Blockchain ?");
+            System.out.println("[7] Get Block data by id");
             System.out.println("//-------------------------//");
             System.out.println("Choose a number: ");
 
@@ -60,7 +62,7 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                 case 1:
 				String firstBlockData;
 				try {
-					firstBlockData = slaveNode.getBlockDataById(0);
+					firstBlockData = masterNode.getBlockDataById(0);
 					System.out.println("The first block data : ");
                 	System.out.println(firstBlockData);
 				} catch (RemoteException e) {
@@ -72,7 +74,7 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                 	Scanner scn2 = new Scanner(System.in);
                     String data = scn2.next();
 				try {
-					slaveNode.sendTransaction(data,masterNode);
+					//slaveNode.sendTransaction(data,masterNode);
 					slaveNode.sendTransaction(data);
 					System.out.println("Trying to send transaction processing pool " + data);
 				} catch (RemoteException e) {
@@ -85,8 +87,8 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                     int blockId = scn3.nextInt();
                     String blockData;
     				try {
-    					blockData = slaveNode.getBlockHashById(blockId);
-    					System.out.println("The block "+blockId+" data: ");
+    					blockData = masterNode.getBlockHashById(blockId);
+    					System.out.println("The block "+blockId+" hash: ");
                     	System.out.println(blockData);
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
@@ -106,9 +108,20 @@ public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws 
                 case 5:
                 	String blockchainJson;
     				try {
-    					blockchainJson = slaveNode.getBlockchainJson(masterNode);
+    					blockchainJson = masterNode.getBlockchainJson(masterNode);
     					System.out.println("The Blockchain");
     					System.out.println(blockchainJson);
+    				} catch (RemoteException e) {
+    					// TODO Auto-generated catch block
+    					e.printStackTrace();
+    				}  	
+                        break;
+                case 6:
+                	int size;
+    				try {
+    					size = masterNode.getBlockchainSize();
+    					System.out.println("The Blockchain size");
+    					System.out.println(size);
     				} catch (RemoteException e) {
     					// TODO Auto-generated catch block
     					e.printStackTrace();
