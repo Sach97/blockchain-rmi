@@ -14,7 +14,7 @@ import com.google.gson.GsonBuilder;
 public class Node implements NodeInterface {
 	private ArrayList<Block> blockchain; 
 	private int difficulty = 5;
-	private PriorityQueue<Block> memPool;
+	private PriorityQueue<String> memPool;
 	private int blockCount=1;
 	private int txCount=1;
 	//private boolean ready = false;
@@ -32,7 +32,7 @@ public class Node implements NodeInterface {
 			blockchain = new ArrayList<Block>();
 			blockchain.add(new Block("genesis block",""));
 			this.port = port;
-			memPool = new PriorityQueue<Block>();
+			memPool = new PriorityQueue<String>();
 			this.status = type.concat(" is ").concat(status);
 		}else {
 			this.port = port;
@@ -55,8 +55,8 @@ public class Node implements NodeInterface {
 	public void processBlocks() throws RemoteException {
 	//while(!memPool.isEmpty() && isChainValid()) {
 	while(!memPool.isEmpty()) { //We simplified the case with one transaction per Block but otherwise we can check if the chain of blocks is Valid see above
-		Block arrivingBlock = getBlockFromPool(); // Get block from slaveNode
-		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash());  
+		String tx = getBlockFromPool(); // Get block from slaveNode
+		Block newBlock = new Block(tx,getHash());  
 		if(isChainValid(newBlock)) {
 			//System.out.println("Trying to mine Block " +blockCount);
 			//blockchain.get(blockCount-1).mineBlock(difficulty); //Only masterNode mine blocks, slaveNode validate transactions
@@ -125,9 +125,9 @@ public class Node implements NodeInterface {
 		return difficulty;
 	}
 	
-	public Block getBlockFromPool() throws RemoteException {
-		Block block = memPool.remove();
-		return block;
+	public String getBlockFromPool() throws RemoteException {
+		String tx = memPool.remove();
+		return tx;
 		
 	}
 	
@@ -145,8 +145,8 @@ public class Node implements NodeInterface {
 	
 	
 	//setters
-	public void addBlockToPool(Block block) throws RemoteException {
-		memPool.add(block);
+	public void addBlockToPool(String tx) throws RemoteException {
+		memPool.add(tx);
 	}
 	
 //	public void setReady() throws RemoteException {
@@ -275,8 +275,8 @@ public class Node implements NodeInterface {
 	}
 	
 	public void broadcastBlock(String newData, NodeInterface m) throws RemoteException {
-		Block newBlock = new Block(newData,m.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
-		m.addBlockToPool(newBlock);
+		//Block newBlock = new Block(newData,m.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
+		m.addBlockToPool(newData);
 		
 	}
 	

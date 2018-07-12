@@ -7,7 +7,8 @@ import java.util.ArrayList;
 public interface NodeInterface extends Remote {
 	
 	//public String getBlockchainJson(NodeInterface masterNode) throws RemoteException;
-	public void addBlockToPool(Block block) throws RemoteException;
+	public void addBlockToPool(String string) throws RemoteException;
+	//public void addBlockToPool(Block block) throws RemoteException;
 	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException;
 	public void processBlocks() throws RemoteException;
 	//public void processTransactions(NodeInterface masterNode) throws RemoteException;
@@ -15,7 +16,8 @@ public interface NodeInterface extends Remote {
 	public Boolean isChainValid() throws RemoteException;
 	public int getBlockCount() throws RemoteException;
 	public int getTxCount() throws RemoteException;
-	public Block getBlockFromPool() throws RemoteException;
+	//public Block getBlockFromPool() throws RemoteException;
+	public String getBlockFromPool() throws RemoteException;
 	public int getDifficulty() throws RemoteException;
 	public ArrayList<Block> getBlockchain() throws RemoteException;
 	public String getHash() throws RemoteException;
