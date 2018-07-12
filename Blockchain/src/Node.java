@@ -15,8 +15,8 @@ public class Node implements NodeInterface {
 	private ArrayList<Block> blockchain; 
 	private int difficulty = 5;
 	private PriorityQueue<Block> memPool;
-	private int blockCount=0;
-	private int txCount=0;
+	private int blockCount=1;
+	private int txCount=1;
 	//private boolean ready = false;
 	private PriorityQueue<String> transactionPool;
 	private String status = "alive";
@@ -30,7 +30,7 @@ public class Node implements NodeInterface {
 		//this.status = type.concat(" is ").concat(status);
 		if(type == "master") {
 			blockchain = new ArrayList<Block>();
-			blockchain.add(new Block("genesis block",getHash(),blockCount));
+			blockchain.add(new Block("genesis block",""));
 			this.port = port;
 			memPool = new PriorityQueue<Block>();
 			this.status = type.concat(" is ").concat(status);
@@ -56,12 +56,12 @@ public class Node implements NodeInterface {
 	//while(!memPool.isEmpty() && isChainValid()) {
 	while(!memPool.isEmpty()) { //We simplified the case with one transaction per Block but otherwise we can check if the chain of blocks is Valid see above
 		Block arrivingBlock = getBlockFromPool(); // Get block from slaveNode
-		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash(),blockCount);  
+		Block newBlock = new Block(arrivingBlock.getData(),arrivingBlock.getHash());  
 		if(isChainValid(newBlock)) {
+			//System.out.println("Trying to mine Block " +blockCount);
+			//blockchain.get(blockCount-1).mineBlock(difficulty); //Only masterNode mine blocks, slaveNode validate transactions
 			blockchain.add(newBlock);
 			blockCount+=1;
-			System.out.println("Trying to mine Block " +blockCount);
-			blockchain.get(blockCount).mineBlock(difficulty); //Only masterNode mine blocks, slaveNode validate transactions
 		}
 	}
 	}
@@ -81,11 +81,11 @@ public class Node implements NodeInterface {
 //		hash = blockchain.get(blockchain.size()-1).getHash();
 //	}
 		String hash;
-		if((blockchain.size()== 0)) {
-			hash = "0";
-		} else {
-			hash = blockchain.get(blockchain.size()-1).getHash();
-		}
+//		if((blockchain.size()== 0)) {
+//			hash = "0";
+//		} else {
+		hash = blockchain.get(blockchain.size()-1).getHash();
+		//}
 		return hash;
 	}
 	
@@ -200,7 +200,7 @@ public class Node implements NodeInterface {
 		
 		for(int i=1;i<blockchain.size();i++) {
 			currentBlock = newBlock;
-			previousBlock = blockchain.get(newBlock.getIndex()-1);
+			previousBlock = blockchain.get(blockchain.size()-1);
 			
 			//compare registered hash and calculated hash:
 			if(!currentBlock.getHash().equals(currentBlock.calculateHash())) {
@@ -251,6 +251,23 @@ public class Node implements NodeInterface {
 			
 		}
 	}
+	
+	public void sendTransaction(String data) throws RemoteException, MalformedURLException, NotBoundException {
+	//public void sendTransaction(String data) throws RemoteException {
+		
+			//broadcastBlock(data);
+			//NodeInterface m = (NodeInterface) UnicastRemoteObject.exportObject(this.masterNode, 0);
+			if((!data.isEmpty())) {
+				broadcastBlock(data,this.masterNode);
+				txCount+=1;
+			}
+//			try {
+//				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+	}
 
 	private String getTransactionFromPool() {
 		String transaction = transactionPool.remove();
@@ -276,23 +293,6 @@ public class Node implements NodeInterface {
 ////				e.printStackTrace();
 ////			}
 //	}
-	
-	public void sendTransaction(String data) throws RemoteException, MalformedURLException, NotBoundException {
-	//public void sendTransaction(String data) throws RemoteException {
-		
-			//broadcastBlock(data);
-			//NodeInterface m = (NodeInterface) UnicastRemoteObject.exportObject(this.masterNode, 0);
-			if((!data.isEmpty())) {
-				broadcastBlock(data,this.masterNode);
-				txCount+=1;
-			}
-//			try {
-//				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
-//			} catch (InterruptedException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-	}
 
 
 	public String getStatus(NodeInterface m) throws RemoteException {
