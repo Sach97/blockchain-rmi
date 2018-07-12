@@ -1,3 +1,6 @@
+import java.net.MalformedURLException;
+import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -16,18 +19,31 @@ public class Node implements NodeInterface {
 	private int txCount=0;
 	//private boolean ready = false;
 	private PriorityQueue<String> transactionPool;
+	private String status = "alive";
 	private NodeInterface masterNode;
 	
-	protected Node() {
-		memPool = new PriorityQueue<Block>();
+	//protected Node() {}
+	
+	
+	protected Node(String type, int port) throws MalformedURLException, RemoteException, NotBoundException {
+		//this.status = type.concat(" is ").concat(status);
+		if(type == "master") {
+			memPool = new PriorityQueue<Block>();
+			this.status = type.concat(" is ").concat(status);
+		}else {
+			this.status = type.concat(" is ").concat(status);
+			transactionPool = new PriorityQueue<String>();
+//			NodeInterface n = (NodeInterface) Naming.lookup("rmi://localhost:" + port + "/Node");
+//			this.masterNode = (NodeInterface) UnicastRemoteObject.exportObject(n, 0);
+		}
 		
 	}
 	
 	
-	protected Node(NodeInterface masterNode) throws RemoteException {
-		transactionPool = new PriorityQueue<String>();
-		this.masterNode = (NodeInterface) UnicastRemoteObject.exportObject(masterNode, 0);;
-	}
+//	protected Node(NodeInterface masterNode) throws RemoteException {
+//		transactionPool = new PriorityQueue<String>();
+//		this.masterNode = (NodeInterface) UnicastRemoteObject.exportObject(masterNode, 0);
+//	}
 
 
 
@@ -74,12 +90,17 @@ public class Node implements NodeInterface {
 	
 
 	//getters
-	public ArrayList<Block> getBlockchain() throws RemoteException {
-		return blockchain;
+	
+	public String getStatus() {
+		return status;
 	}
 	
-	public synchronized String getBlockchainJson() throws RemoteException {
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(getBlockchain());
+	public ArrayList<Block> getBlockchain() throws RemoteException {
+		return this.masterNode.getBlockchain();
+	}
+	
+	public String getBlockchainJson() throws RemoteException {
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(this.masterNode.getBlockchain());
 		return blockchainJson;
 	}
 	
@@ -173,7 +194,7 @@ public class Node implements NodeInterface {
 
 	//SlaveNode methods
 	
-	public void processTransactions(NodeInterface masterNode) throws RemoteException {
+	public void processTransactions() throws RemoteException {
 		while(!transactionPool.isEmpty() && !getTransactionFromPool().isEmpty()) {
 			String t = getTransactionFromPool();
 			//sendTransaction(t,this.masterNode);
@@ -188,8 +209,8 @@ public class Node implements NodeInterface {
 		return transaction;
 	}
 	
-	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException {
-		Block newBlock = new Block(newData,masterNode.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
+	public void broadcastBlock(String newData) throws RemoteException {
+		Block newBlock = new Block(newData,this.masterNode.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
 		masterNode.addBlockToPool(newBlock);
 		
 	}
@@ -198,7 +219,7 @@ public class Node implements NodeInterface {
 	//public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
 	public void sendTransaction(String data) throws RemoteException {
 		
-			broadcastBlock(data,this.masterNode);
+			broadcastBlock(data);
 			//broadcastBlock(data,masterNode);
 //			try {
 //				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
@@ -206,6 +227,18 @@ public class Node implements NodeInterface {
 //				// TODO Auto-generated catch block
 //				e.printStackTrace();
 //			}
+	}
+
+
+	public String getMasterStatus() throws RemoteException {
+		this.masterNode.getStatus(); 
+		return null;
+	}
+
+
+	public String getStatus(NodeInterface masterNode) throws RemoteException {
+		String status = masterNode.getStatus();
+		return status;
 	}
 
 

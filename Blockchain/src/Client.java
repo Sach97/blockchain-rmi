@@ -10,7 +10,7 @@ public class Client {
     public static void main(String[] args) {
 
         String reg_host = "localhost";
-        int slavenode_port = 1098;
+        int slavenode_port = 1099;
 
         if (args.length == 1) {
         	slavenode_port = Integer.parseInt(args[0]);
@@ -22,7 +22,7 @@ public class Client {
 
         NodeInterface slaveNode;
 		try {
-			slaveNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + slavenode_port + "/SlaveNode");
+			slaveNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + slavenode_port + "/Node");
 			cli(slaveNode);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block

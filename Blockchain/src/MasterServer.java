@@ -1,5 +1,6 @@
 import java.net.MalformedURLException;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.ArrayList;
@@ -9,19 +10,20 @@ public class MasterServer {
 	
 	//public static ArrayList<String> blockData = new ArrayList<String>();
 	
-	public MasterServer(int port) {
+	public MasterServer(int port) throws NotBoundException {
         try {
-            Node n = new Node();
+            Node n = new Node("master", port);
             NodeInterface node = (NodeInterface) UnicastRemoteObject.exportObject(n, 0);
             Naming.rebind("rmi://localhost:" + port + "/MasterNode", node);
             System.out.println("MasterNode is starting...");
-            System.out.println("MasterNode started");
-            System.out.println("Waiting for blocks from slave node ...");
-            while(true) {
-            	 n.processBlocks();
-            	 System.out.println(n.getBlockCount());
-            	
-            }
+            System.out.println(node.getStatus());
+//            System.out.println("MasterNode started");
+//            System.out.println("Waiting for blocks from slave node ...");
+//            while(true) {
+//            	 n.processBlocks();
+//            	 System.out.println(n.getBlockCount());
+//            	
+//            }
            
     		
         } catch (MalformedURLException murle) {
@@ -35,7 +37,7 @@ public class MasterServer {
         }
     }
 
-    public static void main(String args[]) {
+    public static void main(String args[]) throws NotBoundException {
 
     	
         int p = 1099; // default port number
