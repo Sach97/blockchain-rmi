@@ -36,7 +36,9 @@ public class SlaveServer {
         System.out.println(masterNode.getStatus()+" From MasterNode registry");
         System.out.println(slaveNode.getStatus()+" From SlaveNode registry");
         System.out.println(slaveNode.getStatus(masterNode)+" From SlaveNode Registry");
-	    //System.out.println(slaveNode.getMasterStatus());
+        System.out.println(slaveNode.getStatusFromLookup()+" From SlaveNode Registry without passsing the object instance");
+        
+	    // send transaction to masterNode
     	
       
     

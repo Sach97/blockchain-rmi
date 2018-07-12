@@ -21,6 +21,7 @@ public class Node implements NodeInterface {
 	private PriorityQueue<String> transactionPool;
 	private String status = "alive";
 	private NodeInterface masterNode;
+	private int port;
 	
 	//protected Node() {}
 	
@@ -28,13 +29,14 @@ public class Node implements NodeInterface {
 	protected Node(String type, int port) throws MalformedURLException, RemoteException, NotBoundException {
 		//this.status = type.concat(" is ").concat(status);
 		if(type == "master") {
+			this.port = port;
 			memPool = new PriorityQueue<Block>();
 			this.status = type.concat(" is ").concat(status);
 		}else {
+			this.port = port;
 			this.status = type.concat(" is ").concat(status);
 			transactionPool = new PriorityQueue<String>();
-//			NodeInterface n = (NodeInterface) Naming.lookup("rmi://localhost:" + port + "/Node");
-//			this.masterNode = (NodeInterface) UnicastRemoteObject.exportObject(n, 0);
+			this.masterNode = (NodeInterface) Naming.lookup("rmi://localhost:" + port + "/MasterNode");
 		}
 		
 	}
@@ -96,11 +98,12 @@ public class Node implements NodeInterface {
 	}
 	
 	public ArrayList<Block> getBlockchain() throws RemoteException {
-		return this.masterNode.getBlockchain();
+		//return this.masterNode.getBlockchain();
+		return null;
 	}
 	
-	public String getBlockchainJson() throws RemoteException {
-		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(this.masterNode.getBlockchain());
+	public String getBlockchainJson(NodeInterface masterNode) throws RemoteException {
+		String blockchainJson = new GsonBuilder().setPrettyPrinting().create().toJson(masterNode.getBlockchain());
 		return blockchainJson;
 	}
 	
@@ -194,11 +197,11 @@ public class Node implements NodeInterface {
 
 	//SlaveNode methods
 	
-	public void processTransactions() throws RemoteException {
+	public void processTransactions(NodeInterface masterNode) throws RemoteException {
 		while(!transactionPool.isEmpty() && !getTransactionFromPool().isEmpty()) {
 			String t = getTransactionFromPool();
-			//sendTransaction(t,this.masterNode);
-			sendTransaction(t);
+			sendTransaction(t,masterNode);
+			//sendTransaction(t);
 			txCount++;
 			
 		}
@@ -209,18 +212,32 @@ public class Node implements NodeInterface {
 		return transaction;
 	}
 	
-	public void broadcastBlock(String newData) throws RemoteException {
-		Block newBlock = new Block(newData,this.masterNode.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
+	public void broadcastBlock(String newData, NodeInterface masterNode) throws RemoteException {
+		Block newBlock = new Block(newData,masterNode.getHash()); //Calculate block hash with previous block hash aka from MasterNode latest block hash
 		masterNode.addBlockToPool(newBlock);
 		
 	}
 	
 	
-	//public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
-	public void sendTransaction(String data) throws RemoteException {
+	public void sendTransaction(String data, NodeInterface masterNode) throws RemoteException {
+	//public void sendTransaction(String data) throws RemoteException {
 		
-			broadcastBlock(data);
-			//broadcastBlock(data,masterNode);
+			//broadcastBlock(data);
+		broadcastBlock(data,masterNode);
+//			try {
+//				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
+//			} catch (InterruptedException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+	}
+	public void sendTransaction(String data) throws RemoteException, MalformedURLException, NotBoundException {
+	//public void sendTransaction(String data) throws RemoteException {
+		
+			//broadcastBlock(data);
+			NodeInterface m = (NodeInterface) Naming.lookup("rmi://localhost" + ":" + this.port + "/MasterNode");
+			NodeInterface masterNode = (NodeInterface) UnicastRemoteObject.exportObject(m, 0);
+			broadcastBlock(data,masterNode);
 //			try {
 //				TimeUnit.SECONDS.sleep(10); // broadcasting blocks every 10 seconds
 //			} catch (InterruptedException e) {
@@ -230,14 +247,14 @@ public class Node implements NodeInterface {
 	}
 
 
-	public String getMasterStatus() throws RemoteException {
-		this.masterNode.getStatus(); 
-		return null;
-	}
-
-
 	public String getStatus(NodeInterface masterNode) throws RemoteException {
 		String status = masterNode.getStatus();
+		return status;
+	}
+	
+	public String getStatusFromLookup() throws RemoteException, MalformedURLException, NotBoundException {
+		
+		status = this.masterNode.getStatus();
 		return status;
 	}
 

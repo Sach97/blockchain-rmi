@@ -2,6 +2,7 @@ import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.server.UnicastRemoteObject;
 //import java.rmi.server.UnicastRemoteObject;
 import java.util.Scanner;
 
@@ -10,20 +11,23 @@ public class Client {
     public static void main(String[] args) {
 
         String reg_host = "localhost";
-        int slavenode_port = 1099;
+        int port = 1099;
 
         if (args.length == 1) {
-        	slavenode_port = Integer.parseInt(args[0]);
+        	port = Integer.parseInt(args[0]);
         } else if (args.length == 2) {
             reg_host = args[0];
-            slavenode_port = Integer.parseInt(args[1]);
+            port = Integer.parseInt(args[1]);
         }
 
 
         NodeInterface slaveNode;
+        NodeInterface masterNode;
 		try {
-			slaveNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + slavenode_port + "/Node");
-			cli(slaveNode);
+			slaveNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + port + "/SlaveNode");
+			masterNode = (NodeInterface) Naming.lookup("rmi://" + reg_host + ":" + port + "/MasterNode");
+	        //masterNode = (NodeInterface) UnicastRemoteObject.exportObject(m, 0);
+			cli(slaveNode, masterNode);
 		} catch (MalformedURLException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -37,7 +41,7 @@ public class Client {
         
     }
     
-public static void cli(NodeInterface slaveNode) {
+public static void cli(NodeInterface slaveNode,NodeInterface masterNode) throws MalformedURLException, NotBoundException {
 		
 		while (true) {
             int choice = -1;
@@ -68,6 +72,7 @@ public static void cli(NodeInterface slaveNode) {
                 	Scanner scn2 = new Scanner(System.in);
                     String data = scn2.next();
 				try {
+					slaveNode.sendTransaction(data,masterNode);
 					slaveNode.sendTransaction(data);
 					System.out.println("Trying to send transaction processing pool " + data);
 				} catch (RemoteException e) {
@@ -101,7 +106,7 @@ public static void cli(NodeInterface slaveNode) {
                 case 5:
                 	String blockchainJson;
     				try {
-    					blockchainJson = slaveNode.getBlockchainJson();
+    					blockchainJson = slaveNode.getBlockchainJson(masterNode);
     					System.out.println("The Blockchain");
     					System.out.println(blockchainJson);
     				} catch (RemoteException e) {

@@ -17,13 +17,13 @@ public class MasterServer {
             Naming.rebind("rmi://localhost:" + port + "/MasterNode", node);
             System.out.println("MasterNode is starting...");
             System.out.println(node.getStatus());
-//            System.out.println("MasterNode started");
-//            System.out.println("Waiting for blocks from slave node ...");
-//            while(true) {
-//            	 n.processBlocks();
-//            	 System.out.println(n.getBlockCount());
-//            	
-//            }
+            System.out.println("MasterNode started");
+            System.out.println("Waiting for blocks from slave node ...");
+            while(true) {
+            	 n.processBlocks();
+            	 System.out.println(n.getBlockCount());
+            	
+            }
            
     		
         } catch (MalformedURLException murle) {
